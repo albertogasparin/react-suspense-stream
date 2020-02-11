@@ -8,6 +8,7 @@ import 'isomorphic-fetch';
 import { Layout } from '../client/layout';
 import { routes } from '../client/routes';
 import * as data from './data';
+import LooselyLazy from '../atlassian-lazy';
 
 const assets = require(process.env.RAZZLE_ASSETS_MANIFEST || '');
 
@@ -16,15 +17,15 @@ server
   .disable('x-powered-by')
   .use(express.static(process.env.RAZZLE_PUBLIC_DIR || ''))
   .get('/api/sidebar', async (req, res) => {
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 100));
     res.send(JSON.stringify(data.sidebar));
   })
   .get('/api/projects', async (req, res) => {
-    await new Promise(r => setTimeout(r, 3000));
+    await new Promise(r => setTimeout(r, 300));
     res.send(JSON.stringify(data.projects));
   })
   .get('/api/projects/:id', async (req, res) => {
-    await new Promise(r => setTimeout(r, 3000));
+    await new Promise(r => setTimeout(r, 300));
     // @ts-ignore
     res.send(JSON.stringify(data.project[req.params.id]));
   })
@@ -38,6 +39,8 @@ server
       routes,
       resourceContext,
     });
+
+    // LooselyLazy.mode('RENDER');
 
     const stream = renderToNodeStreamAsync(
       <StaticRouter
@@ -70,25 +73,24 @@ server
   <body>
     <div id="root">`);
 
+    const getFooter = (rData: any) => `</div>
+    <script>window.__INITIAL_STATE__ = ${JSON.stringify(rData)};</script>
+    <script src="${assets.client.js}" defer crossorigin></script>
+  </body>
+</html>`;
+
     stream.on('data', (chunk: string) => {
       res.write(chunk);
     });
 
-    stream.on('error', () => {
-      res.end(`<script>alert('error')</script>`);
+    stream.on('error', (err: any) => {
+      console.error(err);
+      res.end(getFooter(undefined));
     });
 
     stream.on('end', async () => {
       const resourceData = await resourcesPromise;
-      res.end(`</div>
-    <script>window.__INITIAL_STATE__ = ${JSON.stringify(resourceData)};</script>
-    ${
-      process.env.NODE_ENV === 'production'
-        ? `<script src="${assets.client.js}" defer></script>`
-        : `<script src="${assets.client.js}" defer crossorigin></script>`
-    }
-  </body>
-</html>`);
+      res.end(getFooter(resourceData));
     });
   });
 

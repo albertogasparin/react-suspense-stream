@@ -1,10 +1,10 @@
 import { homeResource } from './resources';
-import HomeComponent from './components/main';
+import { AsyncHomeComponent } from './components/async';
 
 export const homeRoute = {
   name: 'home',
   path: `/`,
-  component: HomeComponent,
+  component: AsyncHomeComponent,
   sidebar: false,
   resources: [homeResource],
   exact: true,

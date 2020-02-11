@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useResource, Link } from '@atlaskit/router';
 
 import { homeResource } from '../resources';
+import { AsyncHomeModal } from './async';
 
 const HomeComponent = () => {
   const [{ data, error, loading, promise }] = useResource(homeResource);
+  const [isModalOpen, toggleModal] = useState(false);
+
   if (!data && !error && promise) {
     throw promise;
   }
@@ -20,6 +23,8 @@ const HomeComponent = () => {
           </li>
         ))}
       </ul>
+      <button onClick={() => toggleModal(!isModalOpen)}>Open modal</button>
+      <AsyncHomeModal open={isModalOpen} onClose={() => toggleModal(false)} />
     </div>
   );
 };

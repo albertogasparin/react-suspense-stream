@@ -1,11 +1,15 @@
 import React from 'react';
-import { hydrate } from 'react-dom';
+import { hydrate, render } from 'react-dom';
 // @ts-ignore
 import { Router } from '@atlaskit/router';
 import { createBrowserHistory } from 'history';
 
 import { Layout } from './layout';
 import { routes } from './routes';
+
+import LooselyLazy from '../atlassian-lazy';
+
+// LooselyLazy.mode('RENDER');
 
 hydrate(
   <Router
